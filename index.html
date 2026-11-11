@@ -398,7 +398,7 @@ const TUT=[
 ];
 function showTutorial(i){
   const s=TUT[i],last=i===TUT.length-1;
-  showSheet(`<div class="eyebrow">Tutorial · ${i+1} dari ${TUT.length}</div><h2>${s.h}</h2>${s.demo}<p>${s.p}</p><div class="steps">${TUT.map((_,k)=>`<span class="${k<=i?'on':''}" style="width:24px;height:8px;padding:0"></span>`).join('')}</div><div style="display:flex;gap:8px">${i?'<button class="btn" id="tBack" type="button">Kembali</button>':''}<button class="btn main" id="tNext" type="button" style="flex:1">${last?'Gas, mulai Hari 1':'Lanjut'}</button></div>`);
+  showSheet(`<div class="eyebrow">Tutorial · ${i+1} dari ${TUT.length}</div><h2>${s.h}</h2>${s.demo}<p>${s.p}</p>${i===0&&SHEET_URL?'<p style="font-size:12.5px">Catatan: pilihan dan skor dalam game ini dicatat untuk penelitian.</p>':''}<div class="steps">${TUT.map((_,k)=>`<span class="${k<=i?'on':''}" style="width:24px;height:8px;padding:0"></span>`).join('')}</div><div style="display:flex;gap:8px">${i?'<button class="btn" id="tBack" type="button">Kembali</button>':''}<button class="btn main" id="tNext" type="button" style="flex:1">${last?'Gas, mulai Hari 1':'Lanjut'}</button></div>`);
   if(i)$('tBack').onclick=()=>showTutorial(i-1);
   $('tNext').onclick=()=>{
     if(!last)return showTutorial(i+1);
@@ -408,10 +408,9 @@ function showTutorial(i){
 }
 /* ===== Pengiriman hasil ke Google Sheets (via Google Apps Script) ===== */
 const SHEET_URL='https://script.google.com/macros/s/AKfycbxXFi7sSJ4AWXh588qR54SiuJ-lhgTaIJ5BrqnboZLGa7v2Jkox0-eFRzZ3avC6HApj/exec'; // tempel URL web app Apps Script (berakhiran /exec) di antara tanda kutip
-let KODE='';
 function buildRow(){
   const s=S.st,t=endingType(),r=x=>+x.toFixed(1);
-  const row={waktu:new Date().toISOString(),kode:KODE,ending:ENDINGS[t].n,ending_kode:['observer','informed','voice','change'].indexOf(t)+1,
+  const row={waktu:new Date().toISOString(),ending:ENDINGS[t].n,ending_kode:['observer','informed','voice','change'].indexOf(t)+1,
     pengetahuan:r(s.pengetahuan),jaringan:r(s.jaringan),suara:r(s.suara),agency:r(s.agency),
     energi:Math.round(s.energi),waktu_sisa:Math.round(s.waktu),uang:Math.round(s.uang),durasi_detik:Math.round((Date.now()-S.t0)/1000)};
   for(let i=0;i<7;i++)row['h'+(i+1)]=S.picks[i]||'';
@@ -432,15 +431,9 @@ async function sendResult(){
   catch(e){setQ(getQ().concat(row));el.textContent='Koneksi bermasalah. Hasil disimpan dan akan dikirim saat online.'}
 }
 window.addEventListener('online',flushQ);
-function showKode(){
-  if(!SHEET_URL)return showTutorial(0);
-  showSheet(`<div class="eyebrow">Sebelum mulai</div><h2>Masukkan kode respondenmu</h2><p>Kode ini dipakai peneliti untuk mencocokkan hasil permainanmu. Pilihan dan skor dalam game dicatat untuk penelitian. Jangan tulis nama lengkap atau data pribadi lain.</p><input id="kode" type="text" maxlength="20" autocomplete="off" placeholder="Contoh: R01" style="font:inherit;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);width:100%"><button class="btn main" id="kodeBtn" type="button">Lanjut</button>`);
-  const go=()=>{const v=$('kode').value.trim();if(!v){$('kode').focus();return}KODE=v;showTutorial(0)};
-  $('kodeBtn').onclick=go;$('kode').onkeydown=e=>{if(e.key==='Enter')go()};
-}
 flushQ();
 start();
-showKode();
+showTutorial(0);
 </script>
 
 </body>
